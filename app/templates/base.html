@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}Chatbot{% endblock %}</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <header class="w-full fixed top-0 bg-white rounded-b-2xl flex items-center shadow-lg px-6 py-4 mb-4 z-10">
+        <div class="w-1/5">
+          <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            alt="BotMIT Logo"
+            class="h-12 object-contain"
+          />
+        </div>
+        <div class="w-3/5 flex flex-col items-center justify-center">
+          <h1 class="text-2xl font-bold text-gray-800">Chat with BotMIT : <span class="text-md text-gray-500">Your University Assistant</span> </h1>
+        </div>
+        <div class="w-1/5">
+          <!-- Empty div for balance -->
+        </div>
+      </header>
+    {% block content %} 
+    {% endblock %}
+  </body>
+</html>

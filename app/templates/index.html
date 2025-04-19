@@ -1,0 +1,143 @@
+{% extends "base.html" %} {% block title %}Chat with BotMIT{% endblock %} {%
+block content %}
+<div
+  class="w-full max-w-3xl bg-gray rounded-2xl shadow-lg flex flex-col h-[90vh] overflow-hidden"
+>
+  <!-- Chat Messages -->
+  <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray">
+    {% for message in messages %} {% if message.sender == 'user' %}
+    <div class="text-right">
+      <div class="inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl">
+        {{ message.text }}
+      </div>
+    </div>
+    {% else %}
+    <div class="text-left">
+      <div class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl">
+        {{ message.text }}
+      </div>
+    </div>
+    {% endif %} {% endfor %}
+  </div>
+
+  <!-- Typing animation placeholder -->
+  <div
+    id="typing-indicator"
+    class="flex-none text-left px-6 py-2 hidden bg-gray-50"
+  >
+    <div
+      id="typing-text"
+      class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl"
+    >
+      BotMIT is typing
+    </div>
+  </div>
+
+  <!-- Chat Input -->
+  <form
+    id="chat-form"
+    class="flex-none flex p-4 bg-white border-t border-gray-200"
+  >
+    <input
+      id="user_input"
+      type="text"
+      name="user_input"
+      placeholder="Type your message..."
+      class="flex-1 border border-gray-300 rounded-full px-4 py-3 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      required
+    />
+    <button
+      type="submit"
+      class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+    >
+      Send
+    </button>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById("chat-form");
+  const typingIndicator = document.getElementById("typing-indicator");
+  const typingText = document.getElementById("typing-text");
+  const chatBox = document.getElementById("chat-box");
+  const userInput = document.getElementById("user_input");
+
+  let typingInterval;
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const userMessage = userInput.value.trim();
+    if (userMessage === "") return;
+
+    // Add user message immediately
+    addMessage(userMessage, "user");
+
+    // Clear input
+    userInput.value = "";
+
+    // Show typing indicator
+    typingIndicator.classList.remove("hidden");
+    startTypingAnimation();
+    typingIndicator.scrollIntoView({ behavior: "smooth" });
+
+    // Replace the fetch section in your script tag
+    try {
+      const response = await fetch("{{ url_for('chat_bp.chat') }}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_input: userMessage }),
+      });
+
+      const data = await response.json();
+      stopTypingAnimation();
+      typingIndicator.classList.add("hidden");
+
+      if (data.bot_response) {
+        addMessage(data.bot_response, "bot");
+      } else {
+        addMessage("Error: No response from server", "bot");
+      }
+    } catch (error) {
+      console.error(error);
+      stopTypingAnimation();
+      typingIndicator.classList.add("hidden");
+      addMessage("Error: Could not connect to server", "bot");
+    }
+  });
+
+  function startTypingAnimation() {
+    let dots = "";
+    typingInterval = setInterval(() => {
+      dots = dots.length < 3 ? dots + "." : "";
+      typingText.textContent = `BotMIT is typing${dots}`;
+    }, 400);
+  }
+
+  function stopTypingAnimation() {
+    clearInterval(typingInterval);
+    typingText.textContent = "BotMIT is typing";
+  }
+
+  function addMessage(text, sender) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = sender === "user" ? "text-right" : "text-left";
+
+    const innerDiv = document.createElement("div");
+    innerDiv.className =
+      sender === "user"
+        ? "inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl"
+        : "inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl";
+
+    innerDiv.textContent = text;
+    messageDiv.appendChild(innerDiv);
+    chatBox.appendChild(messageDiv);
+
+    // Scroll to bottom smoothly
+    messageDiv.scrollIntoView({ behavior: "smooth" });
+  }
+</script>
+
+{% endblock %}
