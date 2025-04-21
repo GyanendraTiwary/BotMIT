@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash, session
 import google.generativeai as genai
 import os
+import uuid
 from app.backend.rag_engine import RAGEngine
 from werkzeug.utils import secure_filename
 import bleach
@@ -45,6 +46,27 @@ def process_markdown(text):
 
 @chat_bp.route('/', methods=['GET', 'POST'])
 def chat():
+    # Check if this is a new tab/window by checking the Referer header
+    referer = request.headers.get('Referer', '')
+    current_url = request.base_url
+    
+    # If there's no referer or it doesn't match our domain, it's likely a new tab
+    if not referer or current_url not in referer:
+        # Generate a new session ID for each new browser tab or window
+        session['session_id'] = str(uuid.uuid4())
+        session['chat_history'] = []
+        # Add welcome message
+        session['chat_history'].append({
+            'sender': 'bot',
+            'text': process_markdown("# Welcome to BotMIT! 👋\nI'm your university assistant. How can I help you today?"),
+            'raw_text': "# Welcome to BotMIT! 👋\nI'm your university assistant. How can I help you today?"
+        })
+
+    # Generate a new session ID for each new browser tab or window
+    if request.method == 'GET' and 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4())
+        session['chat_history'] = []
+    
     # Initialize chat history in session if it doesn't exist
     if 'chat_history' not in session:
         session['chat_history'] = []
@@ -108,6 +130,21 @@ def chat():
     return render_template('index.html', messages=session.get('chat_history', []))
 
 
+
+@chat_bp.route('/clear', methods=['POST'])
+def clear_chat():
+    session['chat_history'] = []  # Clear chat history but keep session ID
+    return '', 204  # No Content (better for fetch)
+
+@chat_bp.route('/new-session', methods=['POST'])
+def new_session():
+    """Create a brand new session - can be triggered by a button"""
+    session.clear()  # Clear the entire session
+    session['session_id'] = str(uuid.uuid4())
+    session['chat_history'] = []
+    return '', 204  # No Content
+
+
 @chat_bp.route('/admin/add-document', methods=['GET', 'POST'])
 def add_document():
     """Admin interface to add documents to the RAG system"""
@@ -127,10 +164,6 @@ def add_document():
     return render_template('admin_add_document.html')
 
 
-@chat_bp.route('/clear', methods=['POST'])
-def clear_chat():
-    session.pop('chat_history', None)
-    return '', 204  # No Content (better for fetch)
 
 @chat_bp.route('/admin/upload-pdf', methods=['GET', 'POST'])
 def upload_pdf():

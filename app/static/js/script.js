@@ -5,11 +5,35 @@ const typingText = document.getElementById("typing-text");
 const chatBox = document.getElementById("chat-box");
 const userInput = document.getElementById("user_input");
 const clearChatButton = document.getElementById("clear-chat-btn");
+const newSessionEndpoint = "/new-session";  
 
 // Store original placeholder text
 const originalPlaceholder = userInput.placeholder;
 
 let typingInterval;
+
+async function requestNewSession() {
+  try {
+    const response = await fetch(newSessionEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+    
+    if (response.ok) {
+      // Clear chat box immediately instead of reloading
+      chatBox.innerHTML = "";
+      // Add a welcome message
+      addMessage("New session started. How can I help you today?", "bot");
+    } else {
+      console.error("Failed to create new session");
+    }
+  } catch (error) {
+    console.error("Error creating new session:", error);
+  }
+}
+
 
 // Add event listener for clear chat button
 clearChatButton.addEventListener("click", async function() {
@@ -131,6 +155,12 @@ function addMessage(text, sender) {
   messageDiv.scrollIntoView({ behavior: "smooth" });
 }
 
+// Add event listener for new session button
+const newSessionButton = document.getElementById("new-session-btn");
+  if (newSessionButton) {
+    newSessionButton.addEventListener("click", requestNewSession);
+}
+
 // Speech recognition functionality
 const micButton = document.getElementById("mic-button");
 let recognition;
@@ -169,6 +199,8 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     // Reset placeholder to original
     userInput.placeholder = originalPlaceholder;
   };
+
+  
   
   // Toggle speech recognition on mic button click
   micButton.addEventListener('click', function() {

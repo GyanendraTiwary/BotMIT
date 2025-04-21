@@ -3,8 +3,18 @@
   <div
   class="w-full max-w-3xl bg-gray rounded-2xl shadow-lg flex flex-col h-[90vh] overflow-hidden pt-24"
   >
-    <!-- Chat Header with Clear Button -->
+    <!-- Chat Header with Clear Button  and new session button-->
+
     <div class="flex justify-end p-3 border-b border-gray-200">
+      <button
+        id="new-session-btn"
+        class="text-gray-600 hover:text-blue-600 focus:outline-none text-sm flex items-center mr-4"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        New Session
+      </button>
       <button
         id="clear-chat-btn"
         class="text-gray-600 hover:text-red-600 focus:outline-none text-sm flex items-center"
