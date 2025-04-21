@@ -1,143 +1,94 @@
 {% extends "base.html" %} {% block title %}Chat with BotMIT{% endblock %} {%
-block content %}
-<div
-  class="w-full max-w-3xl bg-gray rounded-2xl shadow-lg flex flex-col h-[90vh] overflow-hidden"
->
-  <!-- Chat Messages -->
-  <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray">
-    {% for message in messages %} {% if message.sender == 'user' %}
-    <div class="text-right">
-      <div class="inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl">
-        {{ message.text }}
-      </div>
-    </div>
-    {% else %}
-    <div class="text-left">
-      <div class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl">
-        {{ message.text }}
-      </div>
-    </div>
-    {% endif %} {% endfor %}
-  </div>
-
-  <!-- Typing animation placeholder -->
+  block content %}
   <div
-    id="typing-indicator"
-    class="flex-none text-left px-6 py-2 hidden bg-gray-50"
+  class="w-full max-w-3xl bg-gray rounded-2xl shadow-lg flex flex-col h-[90vh] overflow-hidden pt-24"
   >
-    <div
-      id="typing-text"
-      class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl"
-    >
-      BotMIT is typing
+    <!-- Chat Header with Clear Button -->
+    <div class="flex justify-end p-3 border-b border-gray-200">
+      <button
+        id="clear-chat-btn"
+        class="text-gray-600 hover:text-red-600 focus:outline-none text-sm flex items-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+          <path d="M3 6h18"></path>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Clear Chat
+      </button>
     </div>
-  </div>
-
-  <!-- Chat Input -->
-  <form
-    id="chat-form"
-    class="flex-none flex p-4 bg-white border-t border-gray-200"
-  >
-    <input
-      id="user_input"
-      type="text"
-      name="user_input"
-      placeholder="Type your message..."
-      class="flex-1 border border-gray-300 rounded-full px-4 py-3 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
-      required
-    />
-    <button
-      type="submit"
-      class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+  
+    <!-- Chat Messages -->
+    <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray">
+      {% for message in messages %} {% if message.sender == 'user' %}
+      <div class="text-right">
+        <div class="inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl">
+          {{ message.text }}
+        </div>
+      </div>
+      {% else %}
+      <div class="text-left">
+        <div class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl">
+          {{ message.text }}
+        </div>
+      </div>
+      {% endif %} {% endfor %}
+    </div>
+  
+    <!-- Typing animation placeholder -->
+    <div
+      id="typing-indicator"
+      class="flex-none text-left px-6 py-2 hidden bg-gray-50"
     >
-      Send
-    </button>
-  </form>
-</div>
-
-<script>
-  const form = document.getElementById("chat-form");
-  const typingIndicator = document.getElementById("typing-indicator");
-  const typingText = document.getElementById("typing-text");
-  const chatBox = document.getElementById("chat-box");
-  const userInput = document.getElementById("user_input");
-
-  let typingInterval;
-
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const userMessage = userInput.value.trim();
-    if (userMessage === "") return;
-
-    // Add user message immediately
-    addMessage(userMessage, "user");
-
-    // Clear input
-    userInput.value = "";
-
-    // Show typing indicator
-    typingIndicator.classList.remove("hidden");
-    startTypingAnimation();
-    typingIndicator.scrollIntoView({ behavior: "smooth" });
-
-    // Replace the fetch section in your script tag
-    try {
-      const response = await fetch("{{ url_for('chat_bp.chat') }}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_input: userMessage }),
-      });
-
-      const data = await response.json();
-      stopTypingAnimation();
-      typingIndicator.classList.add("hidden");
-
-      if (data.bot_response) {
-        addMessage(data.bot_response, "bot");
-      } else {
-        addMessage("Error: No response from server", "bot");
-      }
-    } catch (error) {
-      console.error(error);
-      stopTypingAnimation();
-      typingIndicator.classList.add("hidden");
-      addMessage("Error: Could not connect to server", "bot");
-    }
-  });
-
-  function startTypingAnimation() {
-    let dots = "";
-    typingInterval = setInterval(() => {
-      dots = dots.length < 3 ? dots + "." : "";
-      typingText.textContent = `BotMIT is typing${dots}`;
-    }, 400);
-  }
-
-  function stopTypingAnimation() {
-    clearInterval(typingInterval);
-    typingText.textContent = "BotMIT is typing";
-  }
-
-  function addMessage(text, sender) {
-    const messageDiv = document.createElement("div");
-    messageDiv.className = sender === "user" ? "text-right" : "text-left";
-
-    const innerDiv = document.createElement("div");
-    innerDiv.className =
-      sender === "user"
-        ? "inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl"
-        : "inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl";
-
-    innerDiv.textContent = text;
-    messageDiv.appendChild(innerDiv);
-    chatBox.appendChild(messageDiv);
-
-    // Scroll to bottom smoothly
-    messageDiv.scrollIntoView({ behavior: "smooth" });
-  }
-</script>
-
-{% endblock %}
+      <div
+        id="typing-text"
+        class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl"
+      >
+        BotMIT is typing
+      </div>
+    </div>
+  
+    <!-- Chat Input -->
+    <form
+      id="chat-form"
+      class="flex-none flex p-4 bg-white border-t border-gray-200"
+    >
+      <input
+        id="user_input"
+        type="text"
+        name="user_input"
+        placeholder="Type your message..."
+        class="flex-1 border border-gray-300 rounded-full px-4 py-3 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+      />
+      <button
+        id="mic-button"
+        type="button"
+        class="bg-gray-200 text-gray-800 px-4 py-3 rounded-full hover:bg-gray-300 transition duration-300 mr-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+      >
+        Send
+      </button>
+    </form>
+  </div>
+  
+  <!-- Pass endpoint URL to JavaScript -->
+  <script>
+    const chatEndpoint = "{{ url_for('chat_bp.chat') }}";
+    const clearChatEndpoint = "{{ url_for('chat_bp.clear_chat') }}";
+  </script>
+  
+  <!-- Load external JavaScript file -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  
+  {% endblock %}

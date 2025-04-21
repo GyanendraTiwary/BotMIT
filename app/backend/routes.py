@@ -88,6 +88,11 @@ def add_document():
     return render_template('admin_add_document.html')
 
 
+@chat_bp.route('/clear', methods=['POST'])
+def clear_chat():
+    session.pop('chat_history', None)
+    return '', 204  # No Content (better for fetch)
+
 @chat_bp.route('/admin/upload-pdf', methods=['GET', 'POST'])
 def upload_pdf():
     """Admin interface to upload PDF files to the RAG system"""
@@ -121,3 +126,5 @@ def upload_pdf():
                                    error="Invalid file. Please upload a PDF file.")
             
     return render_template('admin_upload_pdf.html')
+
+    
