@@ -34,6 +34,22 @@ clearChatButton.addEventListener("click", async function() {
   }
 });
 
+// Import the marked library for markdown rendering
+const markedScript = document.createElement('script');
+markedScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+document.head.appendChild(markedScript);
+
+// Function to convert markdown to HTML
+function markdownToHtml(text) {
+  // If marked is not loaded yet, return the text as is
+  if (typeof marked === 'undefined') {
+    return text;
+  }
+  
+  // Convert markdown to HTML
+  return marked.parse(text);
+}
+
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -99,9 +115,15 @@ function addMessage(text, sender) {
   innerDiv.className =
     sender === "user"
       ? "inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl"
-      : "inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl";
+      : "inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl markdown-content";
 
-  innerDiv.textContent = text;
+  // For bot messages, convert markdown to HTML
+  if (sender === "bot") {
+    innerDiv.innerHTML = markdownToHtml(text);
+  } else {
+    innerDiv.textContent = text;
+  }
+  
   messageDiv.appendChild(innerDiv);
   chatBox.appendChild(messageDiv);
 

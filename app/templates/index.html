@@ -28,8 +28,8 @@
       </div>
       {% else %}
       <div class="text-left">
-        <div class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl">
-          {{ message.text }}
+        <div class="inline-block bg-gray-200 text-gray-800 px-5 py-3 rounded-2xl markdown-content">
+          {{ message.text|safe }}
         </div>
       </div>
       {% endif %} {% endfor %}
@@ -82,11 +82,18 @@
     </form>
   </div>
   
+  <!-- Add Markdown styling -->
+
+  <link rel="stylesheet" src="{{ url_for('static', filename='css/style.css') }}"> 
+  
   <!-- Pass endpoint URL to JavaScript -->
   <script>
     const chatEndpoint = "{{ url_for('chat_bp.chat') }}";
     const clearChatEndpoint = "{{ url_for('chat_bp.clear_chat') }}";
   </script>
+  
+  <!-- Load Marked.js library for markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   
   <!-- Load external JavaScript file -->
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>

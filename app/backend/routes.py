@@ -4,7 +4,9 @@ import google.generativeai as genai
 import os
 from app.backend.rag_engine import RAGEngine
 from werkzeug.utils import secure_filename
+import bleach
 import markdown
+import re
 
 chat_bp = Blueprint('chat_bp', __name__)
 
@@ -14,6 +16,32 @@ genai.configure(api_key=google_api_key)
 
 # Initialize RAG engine
 rag_engine = RAGEngine()
+
+# Configure allowed HTML tags and attributes for safe markdown rendering
+allowed_tags = [
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
+    'em', 'strong', 'del', 'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+    'blockquote', 'code', 'pre', 'a', 'img', 'table', 'thead', 'tbody',
+    'tr', 'th', 'td', 'sup', 'sub'
+]
+
+allowed_attrs = {
+    '*': ['class'],
+    'a': ['href', 'title', 'target'],
+    'img': ['src', 'alt', 'title', 'width', 'height'],
+    'th': ['scope', 'colspan', 'rowspan'],
+    'td': ['colspan', 'rowspan']
+}
+
+def process_markdown(text):
+    """Convert markdown to HTML and sanitize the output"""
+    # Convert markdown to HTML
+    html = markdown.markdown(text, extensions=['extra', 'nl2br'])
+    
+    # Sanitize HTML to prevent XSS attacks
+    sanitized_html = bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs)
+    
+    return sanitized_html
 
 @chat_bp.route('/', methods=['GET', 'POST'])
 def chat():
@@ -38,33 +66,40 @@ def chat():
             # Use RAG Engine with conversation history
             bot_response = rag_engine.generate_response(
                 user_input,
-                conversation_history=chat_history,
-                system_prompt="You are BotMIT, a helpful University Assistant. Answer university-related questions based on the provided context. Format your responses with markdown for better readability."
+                conversation_history=chat_history, 
+                system_prompt="You are BotMIT, a helpful University Assistant. Answer university-related questions based on the provided context. Format your responses with markdown for better readability. Use headers (# for main headings, ## for subheadings), bold (**text**) for emphasis, lists (* item) where appropriate, and other markdown formatting to make your responses clear and structured."
             )
             
-            # Add bot response to history
-            chat_history.append({'sender': 'bot', 'text': bot_response})
+            # Process markdown in the response (for displaying in the template)
+            processed_response = process_markdown(bot_response)
+            
+            # Add bot response to history (store both raw and processed versions)
+            chat_history.append({
+                'sender': 'bot', 
+                'text': processed_response,  # Store the HTML version
+                'raw_text': bot_response     # Store the raw markdown for follow-up context
+            })
             
             # Update session chat history
             session['chat_history'] = chat_history
             
             # If it's a JSON request, return JSON response
             if request.is_json:
-                return jsonify({'bot_response': bot_response})
+                return jsonify({'bot_response': processed_response})
                 
         except Exception as e:
-            bot_response = f"Error: {str(e)}"
+            error_message = f"Error: {str(e)}"
             print(f"Error details: {e}")
             
             # Update session with error
             chat_history = session.get('chat_history', [])
             chat_history.append({'sender': 'user', 'text': user_input})
-            chat_history.append({'sender': 'bot', 'text': bot_response})
+            chat_history.append({'sender': 'bot', 'text': error_message})
             session['chat_history'] = chat_history
             
             # If it's a JSON request, return JSON error
             if request.is_json:
-                return jsonify({'bot_response': bot_response}), 500
+                return jsonify({'bot_response': error_message}), 500
 
         # For form submissions, redirect
         if not request.is_json:

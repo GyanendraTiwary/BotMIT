@@ -286,7 +286,7 @@ class RAGEngine:
         
         # Step 5: Create prompt with conversation history and document context
         if doc_context:
-            full_prompt = f"{system_prompt}\n\n{conversation_context}\nRelevant University Information:\n{doc_context}\n\nCurrent User Question: {query}\n\nPlease answer based on the relevant university information provided above. Format your response nicely with markdown styling for headers, emphasis, and lists. If the information doesn't contain an answer to the question, please respond that you don't have that specific information but try to provide a helpful response based on the conversation context."
+            full_prompt = f"{system_prompt}\n\n{conversation_context}\nRelevant University Information:\n{doc_context}\n\nCurrent User Question: {query}\n\nPlease answer based on the relevant university information provided above. Format your response nicely with markdown styling for headers, emphasis, and lists. If the information doesn't contain an answer to the question, please respond that you don't have that specific information but try to provide a helpful response based on the conversation context. You can add emojis to make the response more engaging."
         else:
             full_prompt = f"{system_prompt}\n\n{conversation_context}\nCurrent User Question: {query}\n\nI don't have specific university data to answer this question. Please respond based on the conversation context if relevant, or inform the user that you don't have the information they're looking for."
         
