@@ -247,26 +247,51 @@ class RAGEngine:
         
         return results
     
-    def generate_response(self, query, system_prompt="You are BotMIT, a helpful University Assistant."):
-        """Generate a response using RAG"""
-        # Step 1: Retrieve relevant documents
+    def generate_response(self, query, conversation_history=None, system_prompt="You are BotMIT, a helpful University Assistant."):
+        """Generate a response using RAG with conversation context"""
+        # Default to empty list if history not provided
+        if conversation_history is None:
+            conversation_history = []
+        
+        # Step 1: Construct context from conversation history
+        conversation_context = ""
+        if conversation_history:
+            conversation_context = "Previous conversation:\n"
+            for i, exchange in enumerate(conversation_history[-3:]):  # Use last 3 exchanges for context
+                if exchange.get('sender') == 'user':
+                    conversation_context += f"User: {exchange.get('text')}\n"
+                else:
+                    conversation_context += f"BotMIT: {exchange.get('text')}\n"
+            conversation_context += "-" * 40 + "\n"
+        
+        # Step 2: Retrieve relevant documents for the current query
         relevant_docs = self.search(query)
         
-        # Step 2: Format context from retrieved documents
-        context = ""
-        for i, doc in enumerate(relevant_docs):
-            context += f"\nDocument {i+1}: {doc['document']['title']}\n"
-            context += f"{doc['document']['content']}\n"
-            context += "-" * 40 + "\n"
+        # Step 3: If no docs are found, also try searching with the last question context
+        if not relevant_docs and len(conversation_history) >= 2:
+            # Get the last user question
+            last_user_messages = [msg for msg in conversation_history if msg.get('sender') == 'user']
+            if last_user_messages:
+                last_question = last_user_messages[-1].get('text', '')
+                # Create combined query
+                combined_query = f"{last_question} {query}"
+                relevant_docs = self.search(combined_query)
         
-        # Step 3: Create prompt with context
-        if context:
-            full_prompt = f"{system_prompt}\n\nRelevant University Information:\n{context}\n\nUser Question: {query}\n\nPlease answer based on the relevant university information provided above. If the information doesn't contain an answer to the question, please respond that you don't have that specific information."
+        # Step 4: Format document context from retrieved documents
+        doc_context = ""
+        for i, doc in enumerate(relevant_docs):
+            doc_context += f"\nDocument {i+1}: {doc['document']['title']}\n"
+            doc_context += f"{doc['document']['content']}\n"
+            doc_context += "-" * 40 + "\n"
+        
+        # Step 5: Create prompt with conversation history and document context
+        if doc_context:
+            full_prompt = f"{system_prompt}\n\n{conversation_context}\nRelevant University Information:\n{doc_context}\n\nCurrent User Question: {query}\n\nPlease answer based on the relevant university information provided above. Format your response nicely with markdown styling for headers, emphasis, and lists. If the information doesn't contain an answer to the question, please respond that you don't have that specific information but try to provide a helpful response based on the conversation context."
         else:
-            full_prompt = f"{system_prompt}\n\nUser Question: {query}\n\nNote: I don't have specific university data to answer this question. I'll respond with general knowledge."
+            full_prompt = f"{system_prompt}\n\n{conversation_context}\nCurrent User Question: {query}\n\nI don't have specific university data to answer this question. Please respond based on the conversation context if relevant, or inform the user that you don't have the information they're looking for."
         
         try:
-            # Step 4: Generate response using Gemini
+            # Step 6: Generate response using Gemini
             model_name = "gemini-1.5-flash"
             
             model = genai.GenerativeModel(model_name)

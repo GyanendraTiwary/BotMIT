@@ -4,6 +4,7 @@ import google.generativeai as genai
 import os
 from app.backend.rag_engine import RAGEngine
 from werkzeug.utils import secure_filename
+import markdown
 
 chat_bp = Blueprint('chat_bp', __name__)
 
@@ -16,10 +17,6 @@ rag_engine = RAGEngine()
 
 @chat_bp.route('/', methods=['GET', 'POST'])
 def chat():
-    # Clear chat history on page refresh (GET request)
-    if request.method == 'GET':
-        session['chat_history'] = []
-    
     # Initialize chat history in session if it doesn't exist
     if 'chat_history' not in session:
         session['chat_history'] = []
@@ -32,16 +29,23 @@ def chat():
             user_input = request.form.get('user_input')
 
         try:
-            # Use RAG Engine instead of direct Gemini call
+            # Get current chat history from session
+            chat_history = session.get('chat_history', [])
+            
+            # Add user message to history
+            chat_history.append({'sender': 'user', 'text': user_input})
+            
+            # Use RAG Engine with conversation history
             bot_response = rag_engine.generate_response(
-                user_input, 
-                system_prompt="You are BotMIT, a helpful University Assistant. Answer university-related questions based on the provided context."
+                user_input,
+                conversation_history=chat_history,
+                system_prompt="You are BotMIT, a helpful University Assistant. Answer university-related questions based on the provided context. Format your responses with markdown for better readability."
             )
             
-            # Update session chat history
-            chat_history = session.get('chat_history', [])
-            chat_history.append({'sender': 'user', 'text': user_input})
+            # Add bot response to history
             chat_history.append({'sender': 'bot', 'text': bot_response})
+            
+            # Update session chat history
             session['chat_history'] = chat_history
             
             # If it's a JSON request, return JSON response
@@ -126,5 +130,3 @@ def upload_pdf():
                                    error="Invalid file. Please upload a PDF file.")
             
     return render_template('admin_upload_pdf.html')
-
-    
