@@ -18,6 +18,7 @@ def create_app():
     app.config['SESSION_PERMANENT'] = False  # Non-permanent sessions
     app.config['SESSION_USE_SIGNER'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour (adjust as needed)
+
     
     # Initialize Flask-Session
     os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)

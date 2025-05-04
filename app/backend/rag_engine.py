@@ -8,6 +8,7 @@ import google.generativeai as genai
 import PyPDF2
 import glob
 import hashlib
+from config import GOOGLE_API_KEY
 
 class RAGEngine:
     def __init__(self, data_dir='data/', embedding_path='embeddings_db/embeddings.npz'):
@@ -32,7 +33,7 @@ class RAGEngine:
         self._load_or_create_embeddings()
         
         # Configure API
-        self.api_key = "AIzaSyDdw6HUrtinwKhXBLMO0_AW_jyuoXtY7pU"
+        self.api_key = GOOGLE_API_KEY
         if self.api_key:
             genai.configure(api_key=self.api_key)
     

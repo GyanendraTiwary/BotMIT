@@ -10,12 +10,12 @@ import markdown
 import re
 from functools import wraps
 import glob
-from config import ADMIN_USERNAME, check_password
+from config import ADMIN_USERNAME, check_password, GOOGLE_API_KEY
 
 chat_bp = Blueprint('chat_bp', __name__)
 
 # Set your Google API key
-google_api_key = "AIzaSyDdw6HUrtinwKhXBLMO0_AW_jyuoXtY7pU"
+google_api_key = GOOGLE_API_KEY
 genai.configure(api_key=google_api_key)
 
 # Initialize RAG engine
