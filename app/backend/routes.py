@@ -8,6 +8,9 @@ from werkzeug.utils import secure_filename
 import bleach
 import markdown
 import re
+from functools import wraps
+import glob
+from config import ADMIN_USERNAME, check_password
 
 chat_bp = Blueprint('chat_bp', __name__)
 
@@ -33,6 +36,15 @@ allowed_attrs = {
     'th': ['scope', 'colspan', 'rowspan'],
     'td': ['colspan', 'rowspan']
 }
+
+# Admin authentication decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('chat_bp.admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def process_markdown(text):
     """Convert markdown to HTML and sanitize the output"""
@@ -129,8 +141,6 @@ def chat():
 
     return render_template('index.html', messages=session.get('chat_history', []))
 
-
-
 @chat_bp.route('/clear', methods=['POST'])
 def clear_chat():
     session['chat_history'] = []  # Clear chat history but keep session ID
@@ -144,8 +154,53 @@ def new_session():
     session['chat_history'] = []
     return '', 204  # No Content
 
+@chat_bp.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    """Admin login page"""
+    error = None
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if not username or not password:
+            error = "Username and password are required."
+        elif username != ADMIN_USERNAME or not check_password(password):
+            error = "Invalid username or password."
+        else:
+            session['admin_logged_in'] = True
+            return redirect(url_for('chat_bp.admin_dashboard'))
+    
+    return render_template('admin_login.html', error=error)
+
+@chat_bp.route('/admin/logout')
+def admin_logout():
+    """Admin logout"""
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('chat_bp.chat'))
+
+@chat_bp.route('/admin')
+@admin_required
+def admin_dashboard():
+    """Admin dashboard page"""
+    # Get list of all documents
+    documents = rag_engine.documents
+    
+    # Get list of all PDFs
+    pdf_files = []
+    for file in glob.glob(os.path.join(rag_engine.pdf_dir, "*.pdf")):
+        pdf_files.append({
+            'filename': os.path.basename(file),
+            'path': file,
+            'size': f"{os.path.getsize(file) / 1024:.1f} KB"
+        })
+    
+    return render_template('admin_dashboard.html', 
+                           documents=documents, 
+                           pdf_files=pdf_files)
 
 @chat_bp.route('/admin/add-document', methods=['GET', 'POST'])
+@admin_required
 def add_document():
     """Admin interface to add documents to the RAG system"""
     if request.method == 'POST':
@@ -163,9 +218,8 @@ def add_document():
             
     return render_template('admin_add_document.html')
 
-
-
 @chat_bp.route('/admin/upload-pdf', methods=['GET', 'POST'])
+@admin_required
 def upload_pdf():
     """Admin interface to upload PDF files to the RAG system"""
     if request.method == 'POST':
@@ -198,3 +252,42 @@ def upload_pdf():
                                    error="Invalid file. Please upload a PDF file.")
             
     return render_template('admin_upload_pdf.html')
+
+@chat_bp.route('/admin/delete-document/<int:doc_id>', methods=['POST'])
+@admin_required
+def delete_document(doc_id):
+    """Delete a text document from the knowledge base"""
+    try:
+        # Delete document using the RAG engine's method
+        success = rag_engine.delete_document(doc_id)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Document deleted successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to delete document'}), 500
+            
+    except ValueError as e:
+        return jsonify({'success': False, 'message': str(e)}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500
+
+@chat_bp.route('/admin/delete-pdf/<filename>', methods=['POST'])
+@admin_required
+def delete_pdf(filename):
+    """Delete a PDF file from the system"""
+    try:
+        # Secure the filename
+        filename = secure_filename(filename)
+        
+        # Delete PDF using the RAG engine's method
+        success = rag_engine.delete_pdf(filename)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'PDF deleted successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to delete PDF'}), 500
+            
+    except FileNotFoundError as e:
+        return jsonify({'success': False, 'message': str(e)}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500

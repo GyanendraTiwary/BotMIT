@@ -14,22 +14,51 @@
     />
   </head>
   <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    <header class="w-full fixed top-0 bg-white rounded-b-2xl flex items-center shadow-lg px-6 py-4 mb-4 z-10">
-        <div class="w-1/5">
-          <img
-            src="{{ url_for('static', filename='images/logo.png') }}"
-            alt="BotMIT Logo"
-            class="h-12 object-contain"
-          />
-        </div>
-        <div class="w-3/5 flex flex-col items-center justify-center">
-          <h1 class="text-2xl font-bold text-gray-800">Chat with BotMIT : <span class="text-md text-gray-500">Your University Assistant</span> </h1>
-        </div>
-        <div class="w-1/5">
-          <!-- Empty div for balance -->
-        </div>
-      </header>
-    {% block content %} 
-    {% endblock %}
+    <header
+      class="w-full fixed top-0 bg-white rounded-b-2xl flex items-center shadow-lg px-6 py-4 mb-4 z-10"
+    >
+      <div class="w-1/5">
+        <img
+          src="{{ url_for('static', filename='images/logo.png') }}"
+          alt="BotMIT Logo"
+          class="h-12 object-contain"
+        />
+      </div>
+      <div class="w-3/5 flex flex-col items-center justify-center">
+        <h1 class="text-2xl font-bold text-gray-800">
+          Chat with BotMIT :
+          <span class="text-md text-gray-500">Your University Assistant</span>
+        </h1>
+      </div>
+      <div class="w-1/5">
+        <!-- Empty div for balance -->
+      </div>
+
+      <!-- Add this admin navigation to base.html just before the closing </header> tag
+      <div class="w-1/5 flex justify-end">
+        {% if session.get('admin_logged_in') %}
+        <a
+          href="{{ url_for('chat_bp.admin_dashboard') }}"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+        >
+          Admin Dashboard
+        </a>
+        <a
+          href="{{ url_for('chat_bp.admin_logout') }}"
+          class="ml-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
+        >
+          Logout
+        </a>
+        {% else %}
+        <a
+          href="{{ url_for('chat_bp.admin_login') }}"
+          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-300"
+        >
+          Admin Login
+        </a>
+        {% endif %}
+      </div> -->
+    </header>
+    {% block content %} {% endblock %}
   </body>
 </html>

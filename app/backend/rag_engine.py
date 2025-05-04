@@ -99,6 +99,82 @@ class RAGEngine:
         if pdf_files:
             self._save_documents()
     
+    def delete_document(self, doc_id):
+        """Delete a document from the collection by ID"""
+        if doc_id < 0 or doc_id >= len(self.documents):
+            raise ValueError(f"Document ID {doc_id} not found")
+        
+        # Remove the document
+        self.documents.pop(doc_id)
+        
+        # Recalculate IDs to maintain consistency
+        for i, doc in enumerate(self.documents):
+            doc['id'] = i
+        
+        # Update embeddings
+        self._create_embeddings()
+        
+        # Save updated documents
+        self._save_documents()
+        
+        return True
+
+    def delete_pdf(self, filename):
+        """Delete a PDF file and its associated documents"""
+        pdf_path = os.path.join(self.pdf_dir, filename)
+        
+        # Check if file exists
+        if not os.path.exists(pdf_path):
+            raise FileNotFoundError(f"PDF file {filename} not found")
+        
+        # Remove the file
+        os.remove(pdf_path)
+        
+        # Remove all documents associated with this PDF
+        pdf_id = f"pdf:{filename}"
+        self.documents = [doc for doc in self.documents if not doc['source'].startswith(pdf_id)]
+        
+        # Recalculate IDs to maintain consistency
+        for i, doc in enumerate(self.documents):
+            doc['id'] = i
+        
+        # Update embeddings
+        self._create_embeddings()
+        
+        # Save updated documents
+        self._save_documents()
+        
+        return True
+
+    def get_document_list(self):
+        """Get a list of all documents organized by source"""
+        document_list = {}
+        
+        for doc in self.documents:
+            source = doc['source']
+            if source not in document_list:
+                document_list[source] = []
+            
+            document_list[source].append({
+                'id': doc['id'],
+                'title': doc['title'],
+            })
+        
+        return document_list
+
+    def get_pdf_list(self):
+        """Get a list of all PDF files"""
+        pdf_files = []
+        
+        for file in glob.glob(os.path.join(self.pdf_dir, "*.pdf")):
+            filename = os.path.basename(file)
+            pdf_files.append({
+                'filename': filename,
+                'size': os.path.getsize(file),
+            })
+        
+        return pdf_files
+    
     def _extract_text_from_pdf(self, pdf_path):
         """Extract text content from a PDF file"""
         text = ""
