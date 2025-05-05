@@ -3,58 +3,58 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>{% block title %}Chatbot{% endblock %}</title>
-
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
+    <!-- Add this meta tag for better touch behavior -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#ffffff" />
   </head>
-  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-0 md:p-4">
     <header
-      class="w-full fixed top-0 bg-white rounded-b-2xl flex items-center shadow-lg px-6 py-4 mb-4 z-10"
+      class="w-full fixed top-0 bg-white rounded-b-lg md:rounded-b-2xl flex items-center shadow-lg px-3 md:px-6 py-2 md:py-4 mb-4 z-10"
     >
       <div class="w-1/5">
         <img
           src="{{ url_for('static', filename='images/logo.png') }}"
           alt="BotMIT Logo"
-          class="h-12 object-contain"
+          class="h-8 md:h-12 object-contain"
         />
       </div>
       <div class="w-3/5 flex flex-col items-center justify-center">
-        <h1 class="text-2xl font-bold text-gray-800">
-          Chat with BotMIT :
-          <span class="text-md text-gray-500">Your University Assistant</span>
+        <h1 class="text-lg md:text-2xl font-bold text-gray-800 text-center">
+          Chat with BotMIT
         </h1>
+        <span class="text-xs md:text-md text-gray-500 hidden sm:inline">Your University Assistant</span>
       </div>
       <div class="w-1/5">
         <!-- Empty div for balance -->
       </div>
 
-      <!-- Add this admin navigation to base.html just before the closing </header> tag
+      <!-- Admin navigation (commented out in original)
       <div class="w-1/5 flex justify-end">
         {% if session.get('admin_logged_in') %}
         <a
           href="{{ url_for('chat_bp.admin_dashboard') }}"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+          class="px-2 py-1 md:px-4 md:py-2 bg-blue-600 text-white text-xs md:text-sm rounded-lg hover:bg-blue-700 transition duration-300"
         >
-          Admin Dashboard
+          Admin
         </a>
         <a
           href="{{ url_for('chat_bp.admin_logout') }}"
-          class="ml-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
+          class="ml-1 md:ml-2 px-2 py-1 md:px-4 md:py-2 bg-red-600 text-white text-xs md:text-sm rounded-lg hover:bg-red-700 transition duration-300"
         >
           Logout
         </a>
         {% else %}
         <a
           href="{{ url_for('chat_bp.admin_login') }}"
-          class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-300"
+          class="px-2 py-1 md:px-4 md:py-2 bg-gray-600 text-white text-xs md:text-sm rounded-lg hover:bg-gray-700 transition duration-300"
         >
-          Admin Login
+          Admin
         </a>
         {% endif %}
       </div> -->

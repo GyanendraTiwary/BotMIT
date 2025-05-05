@@ -1,85 +1,181 @@
+/* Base markdown styling */
 .markdown-content h1 {
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-content h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+.markdown-content h3 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-top: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+.markdown-content p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-content ul, .markdown-content ol {
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-content ul {
+  list-style-type: disc;
+}
+.markdown-content ol {
+  list-style-type: decimal;
+}
+.markdown-content li {
+  margin-bottom: 0.25rem;
+}
+.markdown-content strong {
+  font-weight: bold;
+}
+.markdown-content em {
+  font-style: italic;
+}
+.markdown-content blockquote {
+  border-left: 3px solid #ccc;
+  padding-left: 0.75rem;
+  margin-left: 0.5rem;
+  color: #555;
+}
+.markdown-content code {
+  background-color: #f0f0f0;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+  word-break: break-word;
+}
+.markdown-content pre {
+  background-color: #f0f0f0;
+  padding: 0.5rem;
+  border-radius: 3px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.markdown-content pre code {
+  padding: 0;
+  background-color: transparent;
+  word-break: normal;
+}
+.markdown-content a {
+  color: #3182ce;
+  text-decoration: underline;
+  word-break: break-word;
+}
+.markdown-content a:hover {
+  color: #2c5282;
+}
+.markdown-content hr {
+  border: 0;
+  border-top: 1px solid #eaeaea;
+  margin: 0.8rem 0;
+}
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.8rem 0;
+  font-size: 0.9em;
+  overflow-x: auto;
+  display: block;
+}
+.markdown-content th, .markdown-content td {
+  border: 1px solid #ddd;
+  padding: 0.4rem;
+}
+.markdown-content th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  .markdown-content h1 {
+    font-size: 1.3rem;
   }
   .markdown-content h2 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-top: 0.8rem;
-    margin-bottom: 0.4rem;
+    font-size: 1.2rem;
   }
   .markdown-content h3 {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-top: 0.6rem;
-    margin-bottom: 0.3rem;
-  }
-  .markdown-content p {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  .markdown-content ul, .markdown-content ol {
-    margin-left: 1.5rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  .markdown-content ul {
-    list-style-type: disc;
-  }
-  .markdown-content ol {
-    list-style-type: decimal;
-  }
-  .markdown-content li {
-    margin-bottom: 0.25rem;
-  }
-  .markdown-content strong {
-    font-weight: bold;
-  }
-  .markdown-content em {
-    font-style: italic;
-  }
-  .markdown-content blockquote {
-    border-left: 3px solid #ccc;
-    padding-left: 1rem;
-    margin-left: 1rem;
-    color: #555;
-  }
-  .markdown-content code {
-    background-color: #f0f0f0;
-    padding: 0.2rem 0.4rem;
-    border-radius: 3px;
-    font-family: monospace;
-  }
-  .markdown-content pre {
-    background-color: #f0f0f0;
-    padding: 0.5rem;
-    border-radius: 3px;
-    overflow-x: auto;
-  }
-  .markdown-content a {
-    color: #3182ce;
-    text-decoration: underline;
-  }
-  .markdown-content a:hover {
-    color: #2c5282;
-  }
-  .markdown-content hr {
-    border: 0;
-    border-top: 1px solid #eaeaea;
-    margin: 0.8rem 0;
+    font-size: 1rem;
   }
   .markdown-content table {
-    border-collapse: collapse;
+    font-size: 0.8em;
+  }
+  .markdown-content pre {
+    font-size: 0.8em;
+  }
+  /* Improve tap target sizes for mobile */
+  .markdown-content a {
+    padding: 0.1rem 0;
+    display: inline-block;
+  }
+}
+
+/* Prevent image overflows */
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve code readability on mobile */
+@media (max-width: 640px) {
+  .markdown-content code {
+    white-space: pre-wrap;
+  }
+}
+
+/* Touch-friendly scrolling */
+#chat-box {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for iOS virtual keyboard issues */
+@media (max-width: 640px) {
+  body.keyboard-open {
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
     width: 100%;
-    margin: 0.8rem 0;
   }
-  .markdown-content th, .markdown-content td {
-    border: 1px solid #ddd;
-    padding: 0.5rem;
+}
+
+/* Improve tap target sizes */
+button, a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Default styles for images and media */
+img, video, audio {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix for sticky hover effects on mobile */
+@media (hover: hover) {
+  .hover-effect:hover {
+    opacity: 0.8;
   }
-  .markdown-content th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+}
+
+/* Add dark mode support for devices with dark mode preference */
+@media (prefers-color-scheme: dark) {
+  .markdown-content code {
+    background-color: #2d2d2d;
+    color: #f0f0f0;
   }
+  .markdown-content pre {
+    background-color: #2d2d2d;
+    color: #f0f0f0;
+  }
+}

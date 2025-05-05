@@ -1,58 +1,62 @@
-{% extends "base.html" %} {% block title %}Chat with BotMIT{% endblock %} {%
-  block content %}
+{% extends "base.html" %} 
+{% block title %}Chat with BotMIT{% endblock %} 
+{% block content %}
   <div
-  class="w-full max-w-3xl bg-gray rounded-2xl shadow-lg flex flex-col h-[90vh] overflow-hidden pt-24"
+  class="w-full max-w-3xl bg-gray rounded-lg md:rounded-2xl shadow-lg flex flex-col h-[100vh] md:h-[90vh] overflow-hidden pt-16 md:pt-24"
   >
-    <!-- Chat Header with Clear Button  and new session button-->
-
-    <div class="flex justify-end p-3 border-b border-gray-200">
+    <!-- Chat Header with Clear Button and new session button-->
+    <div class="flex justify-end p-2 md:p-3 border-b border-gray-200">
       <button
         id="new-session-btn"
-        class="text-gray-600 hover:text-blue-600 focus:outline-none text-sm flex items-center mr-4"
+        class="text-gray-600 hover:text-blue-600 focus:outline-none text-xs md:text-sm flex items-center mr-2 md:mr-4"
+        aria-label="New Session"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
-        New Session
+        <span class="hidden sm:inline">New Session</span>
       </button>
       <button
         id="clear-chat-btn"
-        class="text-gray-600 hover:text-red-600 focus:outline-none text-sm flex items-center"
+        class="text-gray-600 hover:text-red-600 focus:outline-none text-xs md:text-sm flex items-center"
+        aria-label="Clear Chat"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
           <path d="M3 6h18"></path>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
           <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
-        Clear Chat
+        <span class="hidden sm:inline">Clear Chat</span>
       </button>
     </div>
   
     <!-- Chat Messages -->
-    <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray">
-      {% for message in messages %} {% if message.sender == 'user' %}
+    <div id="chat-box" class="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-gray">
+      {% for message in messages %} 
+      {% if message.sender == 'user' %}
       <div class="text-right">
-        <div class="inline-block bg-blue-500 text-white px-5 py-3 rounded-2xl">
+        <div class="inline-block bg-blue-500 text-white px-3 py-2 md:px-5 md:py-3 rounded-2xl max-w-[85%] md:max-w-[75%] break-words text-sm md:text-base">
           {{ message.text }}
         </div>
       </div>
       {% else %}
       <div class="text-left">
-        <div class="inline-block bg-gray-200 text-gray-800 px-5 py-3 rounded-2xl markdown-content">
+        <div class="inline-block bg-gray-200 text-gray-800 px-3 py-2 md:px-5 md:py-3 rounded-2xl max-w-[85%] md:max-w-[75%] break-words text-sm md:text-base markdown-content">
           {{ message.text|safe }}
         </div>
       </div>
-      {% endif %} {% endfor %}
+      {% endif %} 
+      {% endfor %}
     </div>
   
     <!-- Typing animation placeholder -->
     <div
       id="typing-indicator"
-      class="flex-none text-left px-6 py-2 hidden bg-gray-50"
+      class="flex-none text-left px-3 md:px-6 py-2 hidden bg-gray-50"
     >
       <div
         id="typing-text"
-        class="inline-block bg-gray-300 text-gray-800 px-5 py-3 rounded-2xl"
+        class="inline-block bg-gray-300 text-gray-800 px-3 py-2 md:px-5 md:py-3 rounded-2xl text-sm md:text-base"
       >
         BotMIT is typing
       </div>
@@ -61,22 +65,24 @@
     <!-- Chat Input -->
     <form
       id="chat-form"
-      class="flex-none flex p-4 bg-white border-t border-gray-200"
+      class="flex-none flex p-2 md:p-4 bg-white border-t border-gray-200"
     >
       <input
         id="user_input"
         type="text"
         name="user_input"
         placeholder="Type your message..."
-        class="flex-1 border border-gray-300 rounded-full px-4 py-3 mr-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        class="flex-1 border border-gray-300 rounded-full px-3 py-2 md:px-4 md:py-3 mr-2 md:mr-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm md:text-base"
         required
+        autocomplete="off"
       />
       <button
         id="mic-button"
         type="button"
-        class="bg-gray-200 text-gray-800 px-4 py-3 rounded-full hover:bg-gray-300 transition duration-300 mr-2"
+        class="bg-gray-200 text-gray-800 px-3 py-2 md:px-4 md:py-3 rounded-full hover:bg-gray-300 transition duration-300 mr-1 md:mr-2"
+        aria-label="Use Microphone"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
           <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -85,7 +91,8 @@
       </button>
       <button
         type="submit"
-        class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-300"
+        class="bg-blue-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-full hover:bg-blue-700 transition duration-300 text-sm md:text-base"
+        aria-label="Send Message"
       >
         Send
       </button>
@@ -93,8 +100,7 @@
   </div>
   
   <!-- Add Markdown styling -->
-
-  <link rel="stylesheet" src="{{ url_for('static', filename='css/style.css') }}"> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
   
   <!-- Pass endpoint URL to JavaScript -->
   <script>
@@ -108,4 +114,33 @@
   <!-- Load external JavaScript file -->
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   
-  {% endblock %}
+  <script>
+    // Add this to handle mobile-specific behaviors
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-focus the input field on desktop but not on mobile
+      const userInput = document.getElementById('user_input');
+      if (window.innerWidth > 768) {
+        userInput.focus();
+      }
+      
+      // Scroll to bottom of chat box when keyboard appears on mobile
+      userInput.addEventListener('focus', function() {
+        setTimeout(function() {
+          const chatBox = document.getElementById('chat-box');
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }, 300);
+      });
+      
+      // Add touch feedback to buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+          this.classList.add('opacity-75');
+        });
+        button.addEventListener('touchend', function() {
+          this.classList.remove('opacity-75');
+        });
+      });
+    });
+  </script>
+{% endblock %}
